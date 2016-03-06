@@ -49,7 +49,15 @@ var ApiRouter = (function () {
                         res.json({ error: 'Missing Parameter: ' + param });
                         return;
                     }
-                    args.push(param ? data[param] : null);
+                    if (param == "$params") {
+                        args.push(data);
+                    }
+                    else if (param == "$user") {
+                        args.push(req.user);
+                    }
+                    else {
+                        args.push(param ? data[param] : null);
+                    }
                 }
                 console.log('handler', params);
                 handler.call(null, args)
@@ -102,23 +110,41 @@ function POST(path, auth) {
     };
 }
 exports.POST = POST;
-function ROUTES(path) {
+function ROUTE(path) {
     return function (target) {
         target.prototype.routesPath = path;
         return target;
     };
 }
-exports.ROUTES = ROUTES;
-function p(name) {
-    return function (target, key, index) {
+exports.ROUTE = ROUTE;
+function p(name, key, index) {
+    if (typeof name === "string") {
+        return function (target, key, index) {
+            if (!target._params)
+                target._params = {};
+            if (!target._params[key])
+                target._params[key] = [];
+            target._params[key][index] = name;
+        };
+    }
+    else {
+        var target = name;
         if (!target._params)
             target._params = {};
         if (!target._params[key])
             target._params[key] = [];
-        target._params[key][index] = name;
-    };
+        target._params[key][index] = '$params';
+    }
 }
 exports.p = p;
+function u(target, key, index) {
+    if (!target._params)
+        target._params = {};
+    if (!target._params[key])
+        target._params[key] = [];
+    target._params[key][index] = '$user';
+}
+exports.u = u;
 var express = require('express');
 var bodyParser = require('body-parser');
 function bootstrap(options) {

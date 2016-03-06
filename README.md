@@ -28,7 +28,7 @@ class Books {
     }
     
     @POST('/')
-    async createBook(@p() params:any){
+    async createBook(@p params:any){
         // params is all the the path params,query & body merged   
     }
     

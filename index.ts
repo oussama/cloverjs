@@ -46,7 +46,13 @@ export class ApiRouter {
                         res.json({error:'Missing Parameter: '+param});
                         return;   
                     }
-                    args.push(param? data[param] : null);
+                    if(param=="$params"){
+                        args.push(data);
+                    }else if(param=="$user"){
+                        args.push(req.user);
+                    }else{
+                        args.push(param? data[param] : null);
+                    }
                 }
                 console.log('handler',params)
                 handler.call(null,args)
@@ -90,21 +96,33 @@ export function POST(path:string,auth:boolean=true){
 	}
 }
 
-export function ROUTES(path:string){
+export function ROUTE(path:string){
 	return(target)=>{
 		target.prototype.routesPath = path;
 		return target;
 	}
 }
 
-export function p(name:string){
-    return(target: any, key : string, index : number)=>{
+export function p(name:any, key? : string, index? : number){
+    if(typeof name === "string"){
+        return(target: any, key : string, index : number)=>{
+            if(!target._params) target._params = {};
+            if(!target._params[key]) target._params[key] = []; 
+            target._params[key][index]=name;
+        }
+    }else{
+        var target = name;
         if(!target._params) target._params = {};
         if(!target._params[key]) target._params[key] = []; 
-        target._params[key][index]=name;
+        target._params[key][index]='$params';
     }
 }
 
+export function u(target:any, key? : string, index? : number){
+    if(!target._params) target._params = {};
+    if(!target._params[key]) target._params[key] = []; 
+    target._params[key][index]='$user';
+}
 
 
 
