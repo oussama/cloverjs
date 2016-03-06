@@ -1,12 +1,16 @@
 {
   "name": "cloverjs",
-  "version": "0.0.1",
-  "description": "0.0.1",
+  "version": "0.0.2",
+  "description": "0.0.2",
   "main": "index.js",
   "scripts": {},
   "keywords": [
     "api",
-    "rest"
+    "rest",
+    "typescript",
+    "router",
+    "express",
+    "async"
   ],
   "author": "Oussama Gammoudi",
   "license": "ISC",
