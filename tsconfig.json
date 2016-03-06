@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+        "declaration": false,
+        "noImplicitAny": false,
+        "removeComments": true,
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "sourceMap": true,
+        "watch": true,
+        "module": "commonjs",
+        "target": "es5"
+    },
+    "exclude": [
+        "node_modules"
+    ],
+    "compileOnSave": true
+}
