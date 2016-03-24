@@ -1,6 +1,5 @@
 "use strict";
 require("reflect-metadata");
-;
 var ApiRouter = (function () {
     function ApiRouter(app) {
         this.app = app;

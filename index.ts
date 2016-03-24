@@ -1,8 +1,5 @@
 import "reflect-metadata";
-declare class Promise<T> {
-    then(a);
-    catch(a);
-};
+import {IThenable} from "promise";
 
 export class ApiRouter {
 		
@@ -31,7 +28,7 @@ export class ApiRouter {
 		this.app.post(path,this.respond(handler.bind(bind),requireUser,params));
 	}
 	
-	private respond(handler:(params,user,request)=>Promise<any>,requireUser:boolean,params){
+	private respond(handler:(params,user,request)=>IThenable<any>,requireUser:boolean,params){
 		return (req,res)=>{
 			if(requireUser && !req.user){
 				res.json({error:'Unauthorized'})
@@ -135,7 +132,7 @@ export interface Options {
     express?:any,
     cors?:boolean,
     port?:number,
-    parseUser?:(request)=>Promise<any>,
+    parseUser?:(request)=>IThenable<any>,
     pretty?:boolean
 }
 

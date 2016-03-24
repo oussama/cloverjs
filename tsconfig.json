@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "declaration": false,
+        "declaration": true,
         "noImplicitAny": false,
         "removeComments": true,
         "emitDecoratorMetadata": true,

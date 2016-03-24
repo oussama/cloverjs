@@ -1,4 +1,4 @@
-import {bootstrap,GET,p} from './index';
+import {bootstrap,GET,p} from '../index';
 
 /**
  * User

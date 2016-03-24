@@ -11,7 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var index_1 = require('./index');
+var index_1 = require('../index');
 var User = (function () {
     function User(parameters) {
     }

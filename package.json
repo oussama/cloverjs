@@ -1,7 +1,7 @@
 {
   "name": "cloverjs",
-  "version": "0.0.2",
-  "description": "0.0.2",
+  "version": "0.0.5",
+  "description": "0.0.5 added d.ts",
   "main": "index.js",
   "scripts": {},
   "keywords": [
@@ -12,9 +12,13 @@
     "express",
     "async"
   ],
+  "files": [
+      "index.js",
+      "index.ts",
+      "README.md"
+  ],
   "author": "Oussama Gammoudi",
   "license": "ISC",
-  "readme": "readme.md",
   "dependencies": {
     "express": "^4.13.4",
     "reflect-metadata": "^0.1.3"
