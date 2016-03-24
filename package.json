@@ -1,7 +1,7 @@
 {
   "name": "cloverjs",
-  "version": "0.0.5",
-  "description": "0.0.5 added d.ts",
+  "version": "0.0.6",
+  "description": "0.0.6 added d.ts",
   "main": "index.js",
   "scripts": {},
   "keywords": [
