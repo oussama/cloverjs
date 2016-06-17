@@ -18,6 +18,13 @@ export class ApiRouter {
 			this[route.method](route.path,obj[route.handler],route.auth,obj,route.params[route.handler]);
 			this.app.api.push(route);
 		})
+        if(prot.rawRoutes){
+            prot.rawRoutes.forEach((route)=>{
+                route.path = basePath+route.path;
+                this.app[route.method](route.path,obj[route.handler].bind(obj));
+                this.app.api.push(route);
+            })
+        }
 	}
 	
 	private get(path:string,handler:(any),requireUser=true,bind:any,params){
@@ -34,31 +41,40 @@ export class ApiRouter {
 				res.json({error:'Unauthorized'})
 				return;	
 			}
+            console.log('before mergee');
 			var data = this.merge(req.body,req.query);
 			data = this.merge(data,req.params);
+            console.log('after merge');
 			if(params){
                 var args = [];
                 for(var param of params){
-                    if(param && data[param]==undefined){
-                        res.json({error:'Missing Parameter: '+param});
-                        return;   
-                    }
                     if(param=="$params"){
                         args.push(data);
                     }else if(param=="$user"){
                         args.push(req.user);
-                    }else{
-                        args.push(param? data[param] : null);
+                    }else if(param=="$request"){
+                        args.push(req);
+                    }else if(param && param.type == "$params"){
+                        if(data[param.name]==undefined){
+                            res.json({error:'Missing Parameter: '+param.name});
+                            return;   
+                        }
+                        console.log(data,param.name);
+                        args.push(data[param.name]);
+                    }else if(param && param.type == "$user"){
+                        args.push(req.user[param.name]);
+                    }else if(param && param.type == "$request"){
+                        args.push(req[param.name]);
                     }
                 }
                 console.log('handler',params)
-                handler.call(null,args)
+                handler.apply(null,args)
                 .then(data => res.json({error:null,data:data}))
-                .catch(error => res.json({error:error.toString(),data:null}));
+                .catch(error => res.json({error:JSON.stringify(error),data:null}));
             }else{
                 handler(data,req.user,req)
                 .then(data => res.json({error:null,data:data}))
-                .catch(error => res.json({error:error.toString(),data:null}));
+                .catch(error => res.json({error:JSON.stringify(error),data:null}));
             }
 		}
 	}
@@ -76,19 +92,29 @@ export class ApiRouter {
 export function GET(path:string,auth:boolean=true){
 	return (target,key,prop)=>{
         var types = Reflect['getMetadata']("design:paramtypes", target, key);
-        if(!target.$paramsTypes) target.$paramTypes = {};
+        if(!target.$paramsTypes) target.$paramsTypes = {};
         if(!target.$paramsTypes[key]) target.$paramsTypes[key] = types.map(type=>type.name);
-        console.log(target._params[key][0],types[0].name);
 		if(!target.routes) target.routes = [];
 		target.routes.push({method:'get',params:target._params,path,auth,handler:key});
 		return prop;
 	}
 }
 
+export function RAW(method:string,path:string){
+	return (target,key,prop)=>{
+		if(!target.rawRoutes) target.rawRoutes = [];
+		target.rawRoutes.push({method,path,handler:key});
+		return prop;
+	}
+}
+
 export function POST(path:string,auth:boolean=true){
 	return (target,key,prop)=>{
+		var types = Reflect['getMetadata']("design:paramtypes", target, key);
+        if(!target.$paramsTypes) target.$paramsTypes = {};
+        if(!target.$paramsTypes[key]) target.$paramsTypes[key] = types.map(type=>type.name);
 		if(!target.routes) target.routes = [];
-		target.routes.push({method:'post',path,auth,handler:key});
+		target.routes.push({method:'post',params:target._params,path,auth,handler:key});
 		return prop;
 	}
 }
@@ -105,7 +131,7 @@ export function p(name:any, key? : string, index? : number){
         return(target: any, key : string, index : number)=>{
             if(!target._params) target._params = {};
             if(!target._params[key]) target._params[key] = []; 
-            target._params[key][index]=name;
+            target._params[key][index]={type:'$params',name:name};
         }
     }else{
         var target = name;
@@ -115,10 +141,38 @@ export function p(name:any, key? : string, index? : number){
     }
 }
 
-export function u(target:any, key? : string, index? : number){
-    if(!target._params) target._params = {};
-    if(!target._params[key]) target._params[key] = []; 
-    target._params[key][index]='$user';
+export function u(name:any, key? : string, index? : number){
+    
+    if(typeof name === "string"){
+        return(target: any, key : string, index : number)=>{
+            if(!target._params) target._params = {};
+            if(!target._params[key]) target._params[key] = []; 
+            target._params[key][index]={type:'$user',name:name};
+        }
+    }else{
+        var target = name;
+        if(!target._params) target._params = {};
+        if(!target._params[key]) target._params[key] = []; 
+        target._params[key][index]='$user';
+    }
+    
+}
+
+export function r(name:any, key? : string, index? : number):any{
+    
+    if(typeof name === "string"){
+        return(target: any, key : string, index : number)=>{
+            if(!target._params) target._params = {};
+            if(!target._params[key]) target._params[key] = []; 
+            target._params[key][index]={type:'$request',name:name};
+        }
+    }else{
+        var target = name;
+        if(!target._params) target._params = {};
+        if(!target._params[key]) target._params[key] = []; 
+        target._params[key][index]='$request';
+    }
+    
 }
 
 
@@ -147,7 +201,7 @@ export function bootstrap(options:Options,...modules):ApiRouter{
         app.use(function(req, res, next) {
             res.header('Access-Control-Allow-Origin', '*');
             res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-            res.header('Access-Control-Allow-Headers', 'Content-Type');
+            res.header('Access-Control-Allow-Headers', 'Content-Type,Authorization');
             next();
         });
     }
