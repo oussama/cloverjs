@@ -2,7 +2,8 @@
   "name": "cloverjs",
   "version": "0.0.7",
   "description": "0.0.7 added d.ts",
-  "main": "index.js",
+  "main": "./index.js",
+  "typings": "./index.d.ts",
   "scripts": {},
   "keywords": [
     "api",
