@@ -22,6 +22,13 @@ var ApiRouter = (function () {
             _this[route.method](route.path, obj[route.handler], route.auth, obj, route.params[route.handler]);
             _this.app.api.push(route);
         });
+        if (prot.rawRoutes) {
+            prot.rawRoutes.forEach(function (route) {
+                route.path = basePath + route.path;
+                _this.app[route.method](route.path, obj[route.handler].bind(obj));
+                _this.app.api.push(route);
+            });
+        }
     };
     ApiRouter.prototype.get = function (path, handler, requireUser, bind, params) {
         if (requireUser === void 0) { requireUser = true; }
@@ -38,35 +45,47 @@ var ApiRouter = (function () {
                 res.json({ error: 'Unauthorized' });
                 return;
             }
+            console.log('before mergee');
             var data = _this.merge(req.body, req.query);
             data = _this.merge(data, req.params);
+            console.log('after merge');
             if (params) {
                 var args = [];
                 for (var _i = 0, params_1 = params; _i < params_1.length; _i++) {
                     var param = params_1[_i];
-                    if (param && data[param] == undefined) {
-                        res.json({ error: 'Missing Parameter: ' + param });
-                        return;
-                    }
                     if (param == "$params") {
                         args.push(data);
                     }
                     else if (param == "$user") {
                         args.push(req.user);
                     }
-                    else {
-                        args.push(param ? data[param] : null);
+                    else if (param == "$request") {
+                        args.push(req);
+                    }
+                    else if (param && param.type == "$params") {
+                        if (data[param.name] == undefined) {
+                            res.json({ error: 'Missing Parameter: ' + param.name });
+                            return;
+                        }
+                        console.log(data, param.name);
+                        args.push(data[param.name]);
+                    }
+                    else if (param && param.type == "$user") {
+                        args.push(req.user[param.name]);
+                    }
+                    else if (param && param.type == "$request") {
+                        args.push(req[param.name]);
                     }
                 }
                 console.log('handler', params);
-                handler.call(null, args)
+                handler.apply(null, args)
                     .then(function (data) { return res.json({ error: null, data: data }); })
-                    .catch(function (error) { return res.json({ error: error.toString(), data: null }); });
+                    .catch(function (error) { return res.json({ error: JSON.stringify(error), data: null }); });
             }
             else {
                 handler(data, req.user, req)
                     .then(function (data) { return res.json({ error: null, data: data }); })
-                    .catch(function (error) { return res.json({ error: error.toString(), data: null }); });
+                    .catch(function (error) { return res.json({ error: JSON.stringify(error), data: null }); });
             }
         };
     };
@@ -88,10 +107,9 @@ function GET(path, auth) {
     return function (target, key, prop) {
         var types = Reflect['getMetadata']("design:paramtypes", target, key);
         if (!target.$paramsTypes)
-            target.$paramTypes = {};
+            target.$paramsTypes = {};
         if (!target.$paramsTypes[key])
             target.$paramsTypes[key] = types.map(function (type) { return type.name; });
-        console.log(target._params[key][0], types[0].name);
         if (!target.routes)
             target.routes = [];
         target.routes.push({ method: 'get', params: target._params, path: path, auth: auth, handler: key });
@@ -99,12 +117,26 @@ function GET(path, auth) {
     };
 }
 exports.GET = GET;
+function RAW(method, path) {
+    return function (target, key, prop) {
+        if (!target.rawRoutes)
+            target.rawRoutes = [];
+        target.rawRoutes.push({ method: method, path: path, handler: key });
+        return prop;
+    };
+}
+exports.RAW = RAW;
 function POST(path, auth) {
     if (auth === void 0) { auth = true; }
     return function (target, key, prop) {
+        var types = Reflect['getMetadata']("design:paramtypes", target, key);
+        if (!target.$paramsTypes)
+            target.$paramsTypes = {};
+        if (!target.$paramsTypes[key])
+            target.$paramsTypes[key] = types.map(function (type) { return type.name; });
         if (!target.routes)
             target.routes = [];
-        target.routes.push({ method: 'post', path: path, auth: auth, handler: key });
+        target.routes.push({ method: 'post', params: target._params, path: path, auth: auth, handler: key });
         return prop;
     };
 }
@@ -123,7 +155,7 @@ function p(name, key, index) {
                 target._params = {};
             if (!target._params[key])
                 target._params[key] = [];
-            target._params[key][index] = name;
+            target._params[key][index] = { type: '$params', name: name };
         };
     }
     else {
@@ -136,14 +168,46 @@ function p(name, key, index) {
     }
 }
 exports.p = p;
-function u(target, key, index) {
-    if (!target._params)
-        target._params = {};
-    if (!target._params[key])
-        target._params[key] = [];
-    target._params[key][index] = '$user';
+function u(name, key, index) {
+    if (typeof name === "string") {
+        return function (target, key, index) {
+            if (!target._params)
+                target._params = {};
+            if (!target._params[key])
+                target._params[key] = [];
+            target._params[key][index] = { type: '$user', name: name };
+        };
+    }
+    else {
+        var target = name;
+        if (!target._params)
+            target._params = {};
+        if (!target._params[key])
+            target._params[key] = [];
+        target._params[key][index] = '$user';
+    }
 }
 exports.u = u;
+function r(name, key, index) {
+    if (typeof name === "string") {
+        return function (target, key, index) {
+            if (!target._params)
+                target._params = {};
+            if (!target._params[key])
+                target._params[key] = [];
+            target._params[key][index] = { type: '$request', name: name };
+        };
+    }
+    else {
+        var target = name;
+        if (!target._params)
+            target._params = {};
+        if (!target._params[key])
+            target._params[key] = [];
+        target._params[key][index] = '$request';
+    }
+}
+exports.r = r;
 var express = require('express');
 var bodyParser = require('body-parser');
 function bootstrap(options) {
@@ -158,7 +222,7 @@ function bootstrap(options) {
         app.use(function (req, res, next) {
             res.header('Access-Control-Allow-Origin', '*');
             res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-            res.header('Access-Control-Allow-Headers', 'Content-Type');
+            res.header('Access-Control-Allow-Headers', 'Content-Type,Authorization');
             next();
         });
     }
