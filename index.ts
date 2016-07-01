@@ -1,5 +1,6 @@
 import "reflect-metadata";
 import {IThenable} from "promise";
+import * as https from 'https';
 
 export class ApiRouter {
 		
@@ -187,11 +188,19 @@ export interface Options {
     cors?:boolean,
     port?:number,
     parseUser?:(request)=>IThenable<any>,
-    pretty?:boolean
+    pretty?:boolean,
+    https?:any
 }
 
 export function bootstrap(options:Options,...modules):ApiRouter{
+
+    
+
 	var app = options.express || express();
+    var httpsServer;
+    if(options.https){
+        httpsServer = https.createServer(options.https, app);
+    }
     
 	app.use(bodyParser.urlencoded({ extended: false }));
 	app.use(bodyParser.json());
@@ -227,9 +236,15 @@ export function bootstrap(options:Options,...modules):ApiRouter{
 	
     // start express server
 	if(options.port){
-        app.listen(options.port, function () {
-            console.log('App Started at port: '+options.port+' !');
-        });
+        if(options.https){
+            httpsServer.listen(options.port, function () {
+                console.log('TLS App Started at port: '+options.port+' !');
+            });
+        }else{
+            app.listen(options.port, function () {
+                console.log('App Started at port: '+options.port+' !');
+            });
+        }
     }
 	
     // add routes

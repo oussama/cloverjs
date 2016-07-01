@@ -1,5 +1,6 @@
 "use strict";
 require("reflect-metadata");
+var https = require('https');
 var ApiRouter = (function () {
     function ApiRouter(app) {
         this.app = app;
@@ -216,6 +217,10 @@ function bootstrap(options) {
         modules[_i - 1] = arguments[_i];
     }
     var app = options.express || express();
+    var httpsServer;
+    if (options.https) {
+        httpsServer = https.createServer(options.https, app);
+    }
     app.use(bodyParser.urlencoded({ extended: false }));
     app.use(bodyParser.json());
     if (options.cors || options.cors == undefined) {
@@ -239,9 +244,16 @@ function bootstrap(options) {
         res.json(app.api);
     });
     if (options.port) {
-        app.listen(options.port, function () {
-            console.log('App Started at port: ' + options.port + ' !');
-        });
+        if (options.https) {
+            httpsServer.listen(options.port, function () {
+                console.log('TLS App Started at port: ' + options.port + ' !');
+            });
+        }
+        else {
+            app.listen(options.port, function () {
+                console.log('App Started at port: ' + options.port + ' !');
+            });
+        }
     }
     for (var _a = 0, modules_1 = modules; _a < modules_1.length; _a++) {
         var modul = modules_1[_a];

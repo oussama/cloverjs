@@ -22,5 +22,6 @@ export interface Options {
     port?: number;
     parseUser?: (request) => IThenable<any>;
     pretty?: boolean;
+    https?: any;
 }
 export declare function bootstrap(options: Options, ...modules: any[]): ApiRouter;
