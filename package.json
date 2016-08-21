@@ -1,7 +1,7 @@
 {
   "name": "cloverjs",
-  "version": "0.0.8",
-  "description": "0.0.8 added d.ts",
+  "version": "0.0.9",
+  "description": "Typescript Decorators based api framework built on top of express.js",
   "main": "./index.js",
   "typings": "./index.d.ts",
   "scripts": {},

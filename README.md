@@ -41,7 +41,12 @@ class Books {
 
 // bootstrap create expressjs app 
 bootstrap({
-    port:5000
+    port:5000,
+    parseUser:(req)=>{
+        var user = {};// ... parse user from req
+        req.user = user;
+        return;
+    }
 },new Books());
 ```
 
