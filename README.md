@@ -15,7 +15,7 @@ import {ROUTE,GET,p,u} from 'cloverjs';
 @ROUTE('/books')
 class Books {
     
-    @GET('/',false) // false for not requiring authentification
+    @GET('/',false) // false for not requiring authentication
     async getBooks(){
         books = await ..........
         return books;
