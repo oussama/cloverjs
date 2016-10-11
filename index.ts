@@ -78,12 +78,12 @@ export class ApiRouter {
                 }
                 console.log('handler',params)
                 handler.apply(null,args)
-                .then(data => res.json({error:null,data:data}))
-                .catch(error => res.json({error:JSON.stringify(error),data:null}));
+                .then(data => this.successResponse(res,data))
+                .catch(error => this.errorResponse(res,error));
             }else{
                 handler(data,req.user,req)
-                .then(data => res.json({error:null,data:data}))
-                .catch(error => res.json({error:JSON.stringify(error),data:null}));
+                .then(data => this.successResponse(res,data))
+                .catch(error => this.errorResponse(res,error));
             }
 		}
 	}
