@@ -1,12 +1,19 @@
 import "reflect-metadata";
 import { IThenable } from "promise";
+export declare enum ResponseType {
+    ErrorData = 0,
+    StatusCode = 1,
+}
 export declare class ApiRouter {
     app: any;
+    responseType: ResponseType;
     constructor(app: any);
     add(obj: any): void;
     private get(path, handler, requireUser, bind, params);
     private post(path, handler, requireUser, bind, params);
     private respond(handler, requireUser, params);
+    successResponse(res: any, data: any): void;
+    errorResponse(res: any, error: any): void;
     private merge(obj1, obj2);
 }
 export declare function GET(path: string, auth?: boolean): (target: any, key: any, prop: any) => any;
@@ -23,5 +30,6 @@ export interface Options {
     parseUser?: (request) => IThenable<any>;
     pretty?: boolean;
     https?: any;
+    responseType: ResponseType;
 }
 export declare function bootstrap(options: Options, ...modules: any[]): ApiRouter;

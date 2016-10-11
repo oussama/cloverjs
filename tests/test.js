@@ -11,7 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var index_1 = require('../index');
+var index_1 = require("../index");
 var User = (function () {
     function User(parameters) {
     }
@@ -28,16 +28,15 @@ var TestRoute = (function () {
             resolve(email);
         });
     };
-    __decorate([
-        index_1.GET('/do', false),
-        __param(0, index_1.p('email')),
-        __param(1, index_1.p('user')), 
-        __metadata('design:type', Function), 
-        __metadata('design:paramtypes', [String, Object]), 
-        __metadata('design:returntype', void 0)
-    ], TestRoute.prototype, "do", null);
     return TestRoute;
 }());
+__decorate([
+    index_1.GET('/do', false),
+    __param(0, index_1.p('email')), __param(1, index_1.p('user')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], TestRoute.prototype, "do", null);
 var route = new TestRoute();
 index_1.bootstrap({ port: 5000 }, route);
 //# sourceMappingURL=test.js.map

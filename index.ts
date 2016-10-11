@@ -3,8 +3,15 @@ import "reflect-metadata";
 import {IThenable} from "promise";
 import * as https from 'https';
 
+export enum ResponseType {
+    ErrorData,
+    StatusCode,
+}
+
 export class ApiRouter {
-		
+
+    responseType = ResponseType.ErrorData;
+
 	constructor(public app){};
 	
 	public add(obj:any){
@@ -80,6 +87,30 @@ export class ApiRouter {
             }
 		}
 	}
+
+    successResponse(res,data){
+        if(this.responseType == ResponseType.ErrorData){
+            res.json({error:null,data:data});
+        }else if(this.responseType == ResponseType.StatusCode){
+            if(data.code){
+                res.status(data.code).json(data.data);
+            }else{
+                res.status(200).json(data);
+            }
+        }
+    }
+
+    errorResponse(res,error){
+        if(this.responseType == ResponseType.ErrorData){
+            res.json({error});
+        }else if(this.responseType == ResponseType.StatusCode){
+            if(error.code){
+                res.status(error.code).json(error.data);
+            }else{
+                res.status(500).json(error);
+            }
+        }
+    }
 	
 	private merge(obj1,obj2){
 		if(!obj2) return obj1;
@@ -190,7 +221,8 @@ export interface Options {
     port?:number,
     parseUser?:(request)=>IThenable<any>,
     pretty?:boolean,
-    https?:any
+    https?:any,
+    responseType:ResponseType
 }
 
 export function bootstrap(options:Options,...modules):ApiRouter{
@@ -230,6 +262,10 @@ export function bootstrap(options:Options,...modules):ApiRouter{
     
 	var router = new ApiRouter(app);
 	
+    if(options.responseType !=undefined && options.responseType!=null){
+        router.responseType = options.responseType;
+    }
+
     // api docs json
 	app.get('/clover.json',function(req,res){
 		res.json(app.api);

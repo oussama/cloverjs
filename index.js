@@ -1,9 +1,15 @@
 "use strict";
 require("reflect-metadata");
-var https = require('https');
+var https = require("https");
+(function (ResponseType) {
+    ResponseType[ResponseType["ErrorData"] = 0] = "ErrorData";
+    ResponseType[ResponseType["StatusCode"] = 1] = "StatusCode";
+})(exports.ResponseType || (exports.ResponseType = {}));
+var ResponseType = exports.ResponseType;
 var ApiRouter = (function () {
     function ApiRouter(app) {
         this.app = app;
+        this.responseType = ResponseType.ErrorData;
     }
     ;
     ApiRouter.prototype.add = function (obj) {
@@ -89,6 +95,32 @@ var ApiRouter = (function () {
                     .catch(function (error) { return res.json({ error: JSON.stringify(error), data: null }); });
             }
         };
+    };
+    ApiRouter.prototype.successResponse = function (res, data) {
+        if (this.responseType == ResponseType.ErrorData) {
+            res.json({ error: null, data: data });
+        }
+        else if (this.responseType == ResponseType.StatusCode) {
+            if (data.code) {
+                res.status(data.code).json(data.data);
+            }
+            else {
+                res.status(200).json(data);
+            }
+        }
+    };
+    ApiRouter.prototype.errorResponse = function (res, error) {
+        if (this.responseType == ResponseType.ErrorData) {
+            res.json({ error: error });
+        }
+        else if (this.responseType == ResponseType.StatusCode) {
+            if (error.code) {
+                res.status(error.code).json(error.data);
+            }
+            else {
+                res.status(500).json(error);
+            }
+        }
     };
     ApiRouter.prototype.merge = function (obj1, obj2) {
         if (!obj2)
@@ -240,6 +272,9 @@ function bootstrap(options) {
         app.set('json spaces', 2);
     }
     var router = new ApiRouter(app);
+    if (options.responseType != undefined && options.responseType != null) {
+        router.responseType = options.responseType;
+    }
     app.get('/clover.json', function (req, res) {
         res.json(app.api);
     });
