@@ -1,6 +1,17 @@
 "use strict";
 require("reflect-metadata");
 var https = require("https");
+exports.Status = {
+    Ok: 200,
+    Created: 201,
+    NoContent: 204,
+    BadRequest: 400,
+    Unauthorized: 401,
+    Forbidden: 403,
+    NotFound: 404,
+    Conflict: 409,
+    InternalServerError: 500,
+};
 (function (ResponseType) {
     ResponseType[ResponseType["ErrorData"] = 0] = "ErrorData";
     ResponseType[ResponseType["StatusCode"] = 1] = "StatusCode";

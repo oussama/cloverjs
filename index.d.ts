@@ -1,5 +1,16 @@
 import "reflect-metadata";
 import { IThenable } from "promise";
+export declare var Status: {
+    Ok: number;
+    Created: number;
+    NoContent: number;
+    BadRequest: number;
+    Unauthorized: number;
+    Forbidden: number;
+    NotFound: number;
+    Conflict: number;
+    InternalServerError: number;
+};
 export declare enum ResponseType {
     ErrorData = 0,
     StatusCode = 1,
