@@ -86,13 +86,13 @@ var ApiRouter = (function () {
                 }
                 console.log('handler', params);
                 handler.apply(null, args)
-                    .then(function (data) { return res.json({ error: null, data: data }); })
-                    .catch(function (error) { return res.json({ error: JSON.stringify(error), data: null }); });
+                    .then(function (data) { return _this.successResponse(res, data); })
+                    .catch(function (error) { return _this.errorResponse(res, error); });
             }
             else {
                 handler(data, req.user, req)
-                    .then(function (data) { return res.json({ error: null, data: data }); })
-                    .catch(function (error) { return res.json({ error: JSON.stringify(error), data: null }); });
+                    .then(function (data) { return _this.successResponse(res, data); })
+                    .catch(function (error) { return _this.errorResponse(res, error); });
             }
         };
     };
