@@ -41,6 +41,6 @@ export interface Options {
     parseUser?: (request) => IThenable<any>;
     pretty?: boolean;
     https?: any;
-    responseType: ResponseType;
+    responseType?: ResponseType;
 }
 export declare function bootstrap(options: Options, ...modules: any[]): ApiRouter;

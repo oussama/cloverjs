@@ -37,7 +37,7 @@ var ApiRouter = (function () {
             this.app.api = [];
         routes.forEach(function (route) {
             route.path = basePath + route.path;
-            _this[route.method](route.path, obj[route.handler], route.auth, obj, route.params[route.handler]);
+            _this[route.method](route.path, obj[route.handler], route.auth, obj, route.params ? route.params[route.handler] : []);
             _this.app.api.push(route);
         });
         if (prot.rawRoutes) {
@@ -60,7 +60,7 @@ var ApiRouter = (function () {
         var _this = this;
         return function (req, res) {
             if (requireUser && !req.user) {
-                res.json({ error: 'Unauthorized' });
+                _this.errorResponse(res, { code: 401, message: 'Unauthorized' });
                 return;
             }
             console.log('before mergee');
@@ -82,7 +82,7 @@ var ApiRouter = (function () {
                     }
                     else if (param && param.type == "$params") {
                         if (data[param.name] == undefined) {
-                            res.json({ error: 'Missing Parameter: ' + param.name });
+                            _this.errorResponse(res, { code: 400, message: 'Missing Parameter: ' + param.name });
                             return;
                         }
                         console.log(data, param.name);

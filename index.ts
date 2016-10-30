@@ -37,7 +37,7 @@ export class ApiRouter {
 		if(!this.app.api) this.app.api = [];
 		routes.forEach((route)=>{
 			route.path = basePath+route.path;
-			this[route.method](route.path,obj[route.handler],route.auth,obj,route.params[route.handler]);
+			this[route.method](route.path,obj[route.handler],route.auth,obj, route.params? route.params[route.handler] : []);
 			this.app.api.push(route);
 		})
         if(prot.rawRoutes){
@@ -60,7 +60,7 @@ export class ApiRouter {
 	private respond(handler:(params,user,request)=>IThenable<any>,requireUser:boolean,params){
 		return (req,res)=>{
 			if(requireUser && !req.user){
-				res.json({error:'Unauthorized'})
+                this.errorResponse(res,{code:401,message:'Unauthorized'});
 				return;	
 			}
             console.log('before mergee');
@@ -78,7 +78,7 @@ export class ApiRouter {
                         args.push(req);
                     }else if(param && param.type == "$params"){
                         if(data[param.name]==undefined){
-                            res.json({error:'Missing Parameter: '+param.name});
+                            this.errorResponse(res,{code:400,message:'Missing Parameter: '+param.name});
                             return;   
                         }
                         console.log(data,param.name);
@@ -235,7 +235,7 @@ export interface Options {
     parseUser?:(request)=>IThenable<any>,
     pretty?:boolean,
     https?:any,
-    responseType:ResponseType
+    responseType?:ResponseType
 }
 
 export function bootstrap(options:Options,...modules):ApiRouter{
