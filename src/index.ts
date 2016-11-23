@@ -1,8 +1,11 @@
 // edit for test
 import "reflect-metadata";
-import {IThenable} from "promise";
 import * as https from 'https';
 
+
+function log(message:string){
+    console.info('cloverjs:',message);
+}
 
 export var Status = {
     Ok:200,
@@ -32,7 +35,7 @@ export class ApiRouter {
 		var routes:Array<any> = prot.routes;
 		var basePath = prot.routesPath;
 		if(!basePath) basePath= "";
-		console.log('routs addded',basePath);
+		console.log('cloverjs:',basePath);
 		if(!routes) throw 'No routes found!';
 		if(!this.app.api) this.app.api = [];
 		routes.forEach((route)=>{
@@ -57,16 +60,14 @@ export class ApiRouter {
 		this.app.post(path,this.respond(handler.bind(bind),requireUser,params));
 	}
 	
-	private respond(handler:(params,user,request)=>IThenable<any>,requireUser:boolean,params){
+	private respond(handler:(params,user,request)=>Promise<any>,requireUser:boolean,params){
 		return (req,res)=>{
 			if(requireUser && !req.user){
                 this.errorResponse(res,{code:401,message:'Unauthorized'});
 				return;	
 			}
-            console.log('before mergee');
 			var data = this.merge(req.body,req.query);
 			data = this.merge(data,req.params);
-            console.log('after merge');
 			if(params){
                 var args = [];
                 for(var param of params){
@@ -81,7 +82,6 @@ export class ApiRouter {
                             this.errorResponse(res,{code:400,message:'Missing Parameter: '+param.name});
                             return;   
                         }
-                        console.log(data,param.name);
                         args.push(data[param.name]);
                     }else if(param && param.type == "$user"){
                         args.push(req.user[param.name]);
@@ -89,7 +89,6 @@ export class ApiRouter {
                         args.push(req[param.name]);
                     }
                 }
-                console.log('handler',params)
                 handler.apply(null,args)
                 .then(data => this.successResponse(res,data))
                 .catch(error => this.errorResponse(res,error));
@@ -105,11 +104,8 @@ export class ApiRouter {
         if(this.responseType == ResponseType.ErrorData){
             res.json({error:null,data:data});
         }else if(this.responseType == ResponseType.StatusCode){
-            if(data.code){
-                res.status(data.code).json(data.data);
-            }else{
-                res.status(200).json(data);
-            }
+            var statusCode = (data && data.code) ? data.code : 200;
+            res.status(statusCode).json(data);
         }
     }
 
@@ -117,11 +113,8 @@ export class ApiRouter {
         if(this.responseType == ResponseType.ErrorData){
             res.json({error});
         }else if(this.responseType == ResponseType.StatusCode){
-            if(error.code){
-                res.status(error.code).json(error.data);
-            }else{
-                res.status(500).json(error);
-            }
+            var statusCode = (error && error.code) ? error.code : 500;
+            res.status(statusCode).json(error);
         }
     }
 	
@@ -232,7 +225,7 @@ export interface Options {
     express?:any,
     cors?:boolean,
     port?:number,
-    parseUser?:(request)=>IThenable<any>,
+    parseUser?:(request)=>Promise<any>,
     pretty?:boolean,
     https?:any,
     responseType?:ResponseType

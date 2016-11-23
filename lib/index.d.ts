@@ -1,5 +1,4 @@
 import "reflect-metadata";
-import { IThenable } from "promise";
 export declare var Status: {
     Ok: number;
     Created: number;
@@ -38,7 +37,7 @@ export interface Options {
     express?: any;
     cors?: boolean;
     port?: number;
-    parseUser?: (request) => IThenable<any>;
+    parseUser?: (request) => Promise<any>;
     pretty?: boolean;
     https?: any;
     responseType?: ResponseType;
