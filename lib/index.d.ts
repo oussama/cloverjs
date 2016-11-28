@@ -34,6 +34,7 @@ export declare function p(name: any, key?: string, index?: number): (target: any
 export declare function u(name: any, key?: string, index?: number): (target: any, key: string, index: number) => void;
 export declare function r(name: any, key?: string, index?: number): any;
 export interface Options {
+    root?: string;
     express?: any;
     cors?: boolean;
     port?: number;

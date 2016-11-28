@@ -222,6 +222,7 @@ var bodyParser = require('body-parser');
 
 
 export interface Options {
+    root?:string,
     express?:any,
     cors?:boolean,
     port?:number,
@@ -236,6 +237,8 @@ export function bootstrap(options:Options,...modules):ApiRouter{
     
 
 	var app = options.express || express();
+    var expressRouter = express.Router();
+    app.use(options.root || '/',expressRouter);
     var httpsServer;
     if(options.https){
         httpsServer = https.createServer(options.https, app);
@@ -266,7 +269,7 @@ export function bootstrap(options:Options,...modules):ApiRouter{
         app.set('json spaces', 2);
     }
     
-	var router = new ApiRouter(app);
+	var router = new ApiRouter(expressRouter);
 	
     if(options.responseType !=undefined && options.responseType!=null){
         router.responseType = options.responseType;

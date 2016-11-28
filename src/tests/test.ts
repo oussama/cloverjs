@@ -30,6 +30,7 @@ class TestRoute {
 var route0 = new TestRoute();
 
 bootstrap({
+    root:'/api',
     port:5000,
     responseType:ResponseType.StatusCode
 },route0);

@@ -1,6 +1,6 @@
 {
   "name": "cloverjs",
-  "version": "0.0.12",
+  "version": "0.0.14",
   "description": "Typescript Decorators based api framework built on top of express.js",
   "main": "./lib/index.js",
   "typings": "./lib/index",
@@ -14,9 +14,7 @@
     "async"
   ],
   "files": [
-      "./lib/index.js",
-      "./lib/index.ts",
-      "./lib/index.d.ts",
+      "lib",
       "README.md"
   ],
   "author": "Oussama Gammoudi",
