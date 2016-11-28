@@ -1,6 +1,6 @@
 {
   "name": "cloverjs",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "description": "Typescript Decorators based api framework built on top of express.js",
   "main": "./lib/index.js",
   "typings": "./lib/index",

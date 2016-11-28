@@ -236,9 +236,9 @@ export function bootstrap(options:Options,...modules):ApiRouter{
 
     
 
-	var app = options.express || express();
-    var expressRouter = express.Router();
-    app.use(options.root || '/',expressRouter);
+	var expressApp = options.express || express();
+    var app = express.Router();
+    expressApp.use(options.root || '/',app);
     var httpsServer;
     if(options.https){
         httpsServer = https.createServer(options.https, app);
@@ -266,10 +266,10 @@ export function bootstrap(options:Options,...modules):ApiRouter{
 	
     // pretiffy json output
     if(options.pretty || options.pretty==undefined){
-        app.set('json spaces', 2);
+        expressApp.set('json spaces', 2);
     }
     
-	var router = new ApiRouter(expressRouter);
+	var router = new ApiRouter(app);
 	
     if(options.responseType !=undefined && options.responseType!=null){
         router.responseType = options.responseType;
@@ -287,7 +287,7 @@ export function bootstrap(options:Options,...modules):ApiRouter{
                 console.log('TLS App Started at port: '+options.port+' !');
             });
         }else{
-            app.listen(options.port, function () {
+            expressApp.listen(options.port, function () {
                 console.log('App Started at port: '+options.port+' !');
             });
         }
