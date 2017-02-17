@@ -19,6 +19,31 @@ export var Status = {
     InternalServerError:500,
 }
 
+function toString(payload:any){
+  if( typeof payload == 'string') return payload;
+  return JSON.stringify(payload);
+}
+
+export function BadRequest(message:string){
+  return {code:400,message:`BadRequest: ${toString(message)}`};
+}
+
+export function NotImplemented(message:string){
+  return {code:501,message:`NotImplemented: ${toString(message)}`};
+}
+
+export function InternalError(message:string){
+  return {code:500,message:`InternalServerError: ${toString(message)}`};
+}
+
+export function Unauthorized(message:string){
+  return {code:401,message:`Unauthorized: ${toString(message)}`};
+}
+
+export function Forbidden(message:string){
+  return {code:403,message:`Forbidden: ${toString(message)}`};
+}
+
 export enum ResponseType {
     ErrorData,
     StatusCode,
@@ -229,7 +254,8 @@ export interface Options {
     parseUser?:(request)=>Promise<any>,
     pretty?:boolean,
     https?:any,
-    responseType?:ResponseType
+    responseType?:ResponseType,
+    bodyRaw?:boolean
 }
 
 export function bootstrap(options:Options,...modules):ApiRouter{
@@ -246,7 +272,10 @@ export function bootstrap(options:Options,...modules):ApiRouter{
     
 	app.use(bodyParser.urlencoded({ extended: false }));
 	app.use(bodyParser.json());
-    
+
+    if(options.bodyRaw){
+        app.use(bodyParser.raw({type: function () { return true } }))
+    };
     // use cors
     if(options.cors || options.cors==undefined){
         app.use(function(req, res, next) {
