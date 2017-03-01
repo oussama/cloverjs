@@ -10,6 +10,26 @@ export declare var Status: {
     Conflict: number;
     InternalServerError: number;
 };
+export declare function BadRequest(message: string): {
+    code: number;
+    message: string;
+};
+export declare function NotImplemented(message: string): {
+    code: number;
+    message: string;
+};
+export declare function InternalError(message: string): {
+    code: number;
+    message: string;
+};
+export declare function Unauthorized(message: string): {
+    code: number;
+    message: string;
+};
+export declare function Forbidden(message: string): {
+    code: number;
+    message: string;
+};
 export declare enum ResponseType {
     ErrorData = 0,
     StatusCode = 1,
@@ -42,5 +62,6 @@ export interface Options {
     pretty?: boolean;
     https?: any;
     responseType?: ResponseType;
+    bodyRaw?: boolean;
 }
 export declare function bootstrap(options: Options, ...modules: any[]): ApiRouter;

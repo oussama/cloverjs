@@ -130,11 +130,12 @@ export class ApiRouter {
             res.json({error:null,data:data});
         }else if(this.responseType == ResponseType.StatusCode){
             var statusCode = (data && data.code) ? data.code : 200;
-            res.status(statusCode).json(data);
+            typeof data == 'string' ? res.status(statusCode).send(data) : res.status(statusCode).json(data);
         }
     }
 
     errorResponse(res,error){
+        console.log(res,error);
         if(this.responseType == ResponseType.ErrorData){
             res.json({error});
         }else if(this.responseType == ResponseType.StatusCode){
